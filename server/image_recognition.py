@@ -2,6 +2,13 @@ import logging
 from collections import Counter
 
 from flask import abort, Request, make_response, jsonify
+from google.cloud import aiplatform
+from google.cloud.aiplatform.v1.schema import predict
+
+
+CONFIDENCE_THRESHOLD: float = 0.5
+MAX_PREDICTIONS: int = 5
+ENDPOINT_ID: str = "2872117885797400576"
 
 
 def load_argument(request: Request, argument: str):
@@ -31,14 +38,37 @@ def mock_prediction():
                     '6809994591421333504']}]
 
 
-def call_vertex(image_bytes: bytes):
-    return mock_prediction()
+def predict_image_object_detection_sample(
+        encoded_image: str,
+        endpoint_id: str,
+        project: str = "728620304704",
+        api_endpoint: str = "europe-west4-aiplatform.googleapis.com",
+        location: str = "europe-west4"
+):
+    client_options = {"api_endpoint": api_endpoint}
+    client = aiplatform.gapic.PredictionServiceClient(client_options=client_options)
+
+    # The format of each instance should conform to the deployed model's prediction input schema.
+    instance = predict.instance.ImageObjectDetectionPredictionInstance(content=encoded_image, ).to_value()
+    parameters = predict.params.ImageObjectDetectionPredictionParams(confidence_threshold=CONFIDENCE_THRESHOLD,
+                                                                     max_predictions=MAX_PREDICTIONS,).to_value()
+    endpoint = client.endpoint_path(project=project, location=location, endpoint=endpoint_id)
+
+    response = client.predict(endpoint=endpoint, instances=[instance], parameters=parameters)
+    return response.predictions
+
+
+def call_vertex(image: str):
+    logging.info("Start prediction.")
+    return predict_image_object_detection_sample(encoded_image=image, endpoint_id=ENDPOINT_ID)
 
 
 def get_labels(predictions) -> dict[str: list]:
+    labels2 = list(predictions[0].get("displayNames"))
+    bboxes = [list(b) for b in predictions[0].get("bboxes")]
     return {
-        'labels': predictions[0].get("displayNames"),
-        'bboxes': predictions[0].get("bboxes")
+        'labels': labels2,
+        'bboxes': bboxes
     }
 
 
@@ -48,7 +78,6 @@ def count_statistics(labels: list[str]) -> dict[str: int]:
     prefix = next(iter(counter.keys())).split(separator)[0]
     front: int = counter[prefix+separator+"front"]
     back: int = counter[prefix+separator+"back"]
-    # all_products = len(list(counter.elements()))
     all_products: int = front + back
     return {
         'all': all_products,
@@ -76,7 +105,8 @@ def join_outputs(labels, stats, rules) -> dict:
 
 
 def prepare_response(output):
-    response = make_response(jsonify(output), 200)
+    json = jsonify(output)
+    response = make_response(json, 200)
     response.headers['Content-Type'] = 'application/json'
     return response
 
@@ -93,11 +123,12 @@ def recognize_product(request: Request):
     product: str = load_argument(request, 'product')
     logging.info(f"Product={product}")
     image = load_argument(request, 'image')
-    logging.info(f"Image provided: {True==image}")
-    image_bytes: bytes = image.encode('utf-8')
+    logging.info(f"Image provided: {image is not None}")
+    image_decoded: str = image
 
-    predictions = call_vertex(image_bytes)
+    predictions = call_vertex(image_decoded)
     labels = get_labels(predictions)
+    logging.info(f"Labels={str(labels)}")
     stats: dict[str: int] = count_statistics(labels.get("labels"))
     logging.info(f"Stats={str(stats)}")
     rules: dict[str: bool] = check_rules(stats)

@@ -79,7 +79,7 @@ def count_stats(predictions):
 
 if __name__ == '__main__':
     mock = True
-    filename = "D:\\projects\\GoogleHackaton\\testAI\\20220122_170004.jpg"
+    filename = "D:\\projects\\GoogleHackaton\\testAI\\20220122_170004_2.jpg"
     image = take_input(filename)
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'D:\\projects\\GoogleHackaton\\salesrecon-05089e0947a7.json'
 
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     else:
         predictions = predict_image_object_detection_sample(
             project="728620304704",
-            endpoint_id="1383678208951451648",
+            endpoint_id="2872117885797400576",
             encoded_image=image
         )
 

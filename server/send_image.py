@@ -3,8 +3,9 @@ import json
 
 import requests
 
-url = 'https://europe-west1-salesrecon.cloudfunctions.net/function-1'
-image_file = "D:\\projects\\GoogleHackaton\\testAI\\20220122_170004.jpg"
+url = 'https://europe-west1-salesrecon.cloudfunctions.net/function-2'
+# image_file = "D:\\projects\\GoogleHackaton\\testAI\\20220122_170004_2.jpg"
+image_file = "D:\\projects\\GoogleHackaton\\testAI\\20220122_170025_2.jpg"
 
 
 if __name__ == '__main__':
