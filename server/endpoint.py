@@ -6,6 +6,11 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
+from proto.marshal.collections import RepeatedComposite
+
+CONFIDENCE_THRESHOLD: float = 0.5
+MAX_PREDICTIONS: int = 5
+
 
 def predict_image_object_detection_sample(
     project: str,
@@ -29,7 +34,7 @@ def predict_image_object_detection_sample(
     ).to_value()
     instances = [instance]
     parameters = predict.params.ImageObjectDetectionPredictionParams(
-        confidence_threshold=0.5, max_predictions=5,
+        confidence_threshold=CONFIDENCE_THRESHOLD, max_predictions=MAX_PREDICTIONS,
     ).to_value()
     endpoint = client.endpoint_path(
         project=project, location=location, endpoint=endpoint_id
@@ -40,7 +45,7 @@ def predict_image_object_detection_sample(
     return response.predictions
 
 
-def print_bbox(image, predictions):
+def print_bbox(image, predictions: RepeatedComposite):
     im = Image.open(image)
     x = im.size[0]
     y = im.size[1]
@@ -65,13 +70,16 @@ def print_bbox(image, predictions):
     plt.show()
 
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/home/slupski/Desktop/ML-projects/salesrecon/easyserverless-337916-d2edcdf54171.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'D:\\projects\\GoogleHackaton\\salesrecon-05089e0947a7.json'
 
-image = "/home/slupski/Downloads/test2.jpg"
-predictions = predict_image_object_detection_sample(
-    project="322035613717",
-    endpoint_id="2200518591365775360",
+image = "D:\\projects\\GoogleHackaton\\testAI\\20220122_170004_2.jpg"
+predictions: RepeatedComposite = predict_image_object_detection_sample(
+    project="728620304704",
+    endpoint_id="1383678208951451648",
     filename=image
 )
 
+for prediction in predictions:
+    print(" prediction:", dict(prediction))
 print_bbox(image, predictions)
+
