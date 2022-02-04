@@ -4,21 +4,20 @@ provider "google" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "dsrgbshdnjffhmik"
+  name     = "salesrecon"
   location = "europe-west1"
   project = "SALESRECON"
 }
 
 resource "google_storage_bucket_object" "archive" {
-  name   = "awerfawfaer"
+  name   = "coca-cola"
   bucket = google_storage_bucket.bucket.name
-  source = "../t_function-py/t_function-py.zip"
+  source = "../function/function.zip"
 }
 
 resource "google_cloudfunctions_function" "function" {
   project = "salesrecon"
-  name        = "function-test"
-  description = "My function"
+  name        = "coca-cola-function"
   runtime     = "python39"
 
   available_memory_mb   = 128
