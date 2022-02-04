@@ -1,4 +1,4 @@
-    function - 
+    function:
         python code use in Cloud Function
     terraform:
         - storage bucket for function
