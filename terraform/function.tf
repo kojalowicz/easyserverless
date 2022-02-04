@@ -1,8 +1,3 @@
-provider "google" {
-  project = "salesrecon"
-  region  = "europe-west1"
-}
-
 resource "google_storage_bucket" "bucket" {
   name     = "salesrecon"
   location = "europe-west1"
