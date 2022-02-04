@@ -14,7 +14,6 @@ resource "google_cloudfunctions_function" "function" {
   project = "salesrecon"
   name        = "coca-cola-function"
   runtime     = "python39"
-
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name
   source_archive_object = google_storage_bucket_object.archive.name
